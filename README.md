@@ -87,7 +87,7 @@ public class NewOrder_Example
 {
     public static async Task Main(string[] args)
     {
-        var websocket = new WebSocketApi("wss://testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac("apiSecret"));
+        var websocket = new WebSocketApi("wss://ws-api.testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac("apiSecret"));
 
         websocket.OnMessageReceived(
             async (data) =>
