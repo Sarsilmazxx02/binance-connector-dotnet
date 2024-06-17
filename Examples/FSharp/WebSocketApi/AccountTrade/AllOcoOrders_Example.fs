@@ -20,7 +20,7 @@ let main argv =
 
     let privateKey = File.ReadAllText("/Users/john/ssl/Private_key.pem");
 
-    let websocket = new WebSocketApi("wss://testnet.binance.vision/ws-api/v3", "apiKey", new BinanceRsa(privateKey));
+    let websocket = new WebSocketApi("wss://ws-api.testnet.binance.vision/ws-api/v3", "apiKey", new BinanceRsa(privateKey));
 
     let onlyOneMessage = new TaskCompletionSource<string>();
 

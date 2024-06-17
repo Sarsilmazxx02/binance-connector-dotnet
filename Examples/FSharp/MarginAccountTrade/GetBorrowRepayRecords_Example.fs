@@ -20,8 +20,8 @@ let main argv =
     let apiKey = "api-key";
     let apiSecret = "api-secret";
     
-    let staking = new Staking(httpClient, apiKey = apiKey, apiSecret = apiSecret)
+    let marginAccountTrade = new MarginAccountTrade(httpClient, apiKey = apiKey, apiSecret = apiSecret)
     
-    let result = staking.GetPersonalLeftQuotaOfStakingProduct("STAKING", "Axs*90") |> Async.AwaitTask |> Async.RunSynchronously
+    let result = marginAccountTrade.GetBorrowRepayRecords(MarginBorrowRepayType.BORROW) |> Async.AwaitTask |> Async.RunSynchronously
     
     0

@@ -24,26 +24,29 @@ namespace Binance.Spot
         {
         }
 
-        private const string CROSS_MARGIN_ACCOUNT_TRANSFER = "/sapi/v1/margin/transfer";
+        private const string MARGIN_ACCOUNT_BORROW_REPAY = "/sapi/v1/margin/borrow-repay";
 
         /// <summary>
-        /// Execute transfer between spot account and cross margin account.<para />
-        /// Weight(IP): 600.
+        /// Margin account borrow/repay(MARGIN).<para />
+        /// Weight(UID): 3000.
         /// </summary>
         /// <param name="asset"></param>
+        /// <param name="isIsolated">TRUE for Isolated Margin, FALSE for Cross Margin, Default FALSE.</param>
+        /// <param name="symbol">Only for Isolated margin.</param>
         /// <param name="amount"></param>
-        /// <param name="type">* `1` - transfer from main account to margin account.<para />
-        /// * `2` - transfer from margin account to main account.</param>
+        /// <param name="type">BORROW or REPAY.</param>
         /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Transfer Id.</returns>
-        public async Task<string> CrossMarginAccountTransfer(string asset, decimal amount, MarginTransferType type, long? recvWindow = null)
+        /// <returns>Margin Account borrow/repay transaction id.</returns>
+        public async Task<string> MarginAccountBorrowRepay(string asset, string isIsolated, string symbol, string amount, MarginBorrowRepayType type, long? recvWindow = null)
         {
             var result = await this.SendSignedAsync<string>(
-                CROSS_MARGIN_ACCOUNT_TRANSFER,
+                MARGIN_ACCOUNT_BORROW_REPAY,
                 HttpMethod.Post,
                 query: new Dictionary<string, object>
                 {
                     { "asset", asset },
+                    { "isIsolated", isIsolated },
+                    { "symbol", symbol },
                     { "amount", amount },
                     { "type", type },
                     { "recvWindow", recvWindow },
@@ -53,107 +56,39 @@ namespace Binance.Spot
             return result;
         }
 
-        private const string MARGIN_ACCOUNT_BORROW = "/sapi/v1/margin/loan";
+        private const string GET_BORROW_REPAY_RECORDS = "/sapi/v1/margin/borrow-repay";
 
         /// <summary>
-        /// Apply for a loan.<para />
-        /// - If "isIsolated" = "TRUE", "symbol" must be sent.<para />
-        /// - "isIsolated" = "FALSE" for crossed margin loan.<para />
-        /// Weight(UID): 3000.
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="amount"></param>
-        /// <param name="isIsolated">* `TRUE` - For isolated margin.<para />
-        /// * `FALSE` - Default, not for isolated margin.</param>
-        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Transaction id.</returns>
-        public async Task<string> MarginAccountBorrow(string asset, decimal amount, bool? isIsolated = null, string symbol = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                MARGIN_ACCOUNT_BORROW,
-                HttpMethod.Post,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
-                    { "isIsolated", isIsolated },
-                    { "symbol", symbol },
-                    { "amount", amount },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string MARGIN_ACCOUNT_REPAY = "/sapi/v1/margin/repay";
-
-        /// <summary>
-        /// Repay loan for margin account.<para />
-        /// - If "isIsolated" = "TRUE", "symbol" must be sent.<para />
-        /// - "isIsolated" = "FALSE" for crossed margin repay.<para />
-        /// Weight(IP): 3000.
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="amount"></param>
-        /// <param name="isIsolated">* `TRUE` - For isolated margin.<para />
-        /// * `FALSE` - Default, not for isolated margin.</param>
-        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Transaction id.</returns>
-        public async Task<string> MarginAccountRepay(string asset, decimal amount, bool? isIsolated = null, string symbol = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                MARGIN_ACCOUNT_REPAY,
-                HttpMethod.Post,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
-                    { "isIsolated", isIsolated },
-                    { "symbol", symbol },
-                    { "amount", amount },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string QUERY_MARGIN_ASSET = "/sapi/v1/margin/asset";
-
-        /// <summary>
+        /// Query borrow/repay records in Margin account(USER_DATA).<para />
         /// Weight(IP): 10.
         /// </summary>
+        /// <param name="type">BORROW or REPAY.</param>
         /// <param name="asset"></param>
-        /// <returns>Asset details.</returns>
-        public async Task<string> QueryMarginAsset(string asset)
+        /// <param name="isIsolated">Symbol in Isolated Margin.</param>
+        /// <param name="txId">tranId in POST /sapi/v1/margin/loan.</param>
+        /// <param name="startTime"></param>
+        /// <param name="endTime"></param>
+        /// <param name="current">Current querying page. Start from 1. Default:1.</param>
+        /// <param name="size">Default:10 Max:100.</param>
+        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
+        /// <returns>Borrow/Repay records.</returns>
+        public async Task<string> GetBorrowRepayRecords(MarginBorrowRepayType type, string asset = null, string isIsolated = null, long? txId = null, long? startTime = null, long? endTime = null, long? current = null, long? size = null, long? recvWindow = null)
         {
-            var result = await this.SendPublicAsync<string>(
-                QUERY_MARGIN_ASSET,
+            var result = await this.SendSignedAsync<string>(
+                GET_BORROW_REPAY_RECORDS,
                 HttpMethod.Get,
                 query: new Dictionary<string, object>
                 {
+                    { "type", type },
                     { "asset", asset },
-                });
-
-            return result;
-        }
-
-        private const string QUERY_CROSS_MARGIN_PAIR = "/sapi/v1/margin/pair";
-
-        /// <summary>
-        /// Weight(IP): 10.
-        /// </summary>
-        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
-        /// <returns>Margin pair details.</returns>
-        public async Task<string> QueryCrossMarginPair(string symbol)
-        {
-            var result = await this.SendPublicAsync<string>(
-                QUERY_CROSS_MARGIN_PAIR,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "symbol", symbol },
+                    { "isIsolated", isIsolated },
+                    { "txId", txId },
+                    { "startTime", startTime },
+                    { "endTime", endTime },
+                    { "current", current },
+                    { "size", size },
+                    { "recvWindow", recvWindow },
+                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
                 });
 
             return result;
@@ -164,12 +99,17 @@ namespace Binance.Spot
         /// <summary>
         /// Weight(IP): 1.
         /// </summary>
+        /// <param name="asset"></param>
         /// <returns>Assets details.</returns>
-        public async Task<string> GetAllMarginAssets()
+        public async Task<string> GetAllMarginAssets(string asset = null)
         {
             var result = await this.SendPublicAsync<string>(
                 GET_ALL_MARGIN_ASSETS,
-                HttpMethod.Get);
+                HttpMethod.Get,
+                query: new Dictionary<string, object>
+                {
+                    { "asset", asset },
+                });
 
             return result;
         }
@@ -179,12 +119,17 @@ namespace Binance.Spot
         /// <summary>
         /// Weight(IP): 1.
         /// </summary>
+        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
         /// <returns>Margin pairs.</returns>
-        public async Task<string> GetAllCrossMarginPairs()
+        public async Task<string> GetAllCrossMarginPairs(string symbol = null)
         {
             var result = await this.SendPublicAsync<string>(
                 GET_ALL_CROSS_MARGIN_PAIRS,
-                HttpMethod.Get);
+                HttpMethod.Get,
+                query: new Dictionary<string, object>
+                {
+                    { "symbol", symbol },
+                });
 
             return result;
         }
@@ -218,7 +163,7 @@ namespace Binance.Spot
         /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
         /// <param name="side"></param>
         /// <param name="type">Order type.</param>
-        /// <param name="isIsolated">* `TRUE` - For isolated margin.<para />
+        /// <param name="isIsolated">* `TRUE` - For isolated margin.<param/>
         /// * `FALSE` - Default, not for isolated margin.</param>
         /// <param name="quantity"></param>
         /// <param name="quoteOrderQty">Quote quantity.</param>
@@ -334,10 +279,10 @@ namespace Binance.Spot
         /// <param name="endTime">UTC timestamp in ms.</param>
         /// <param name="current">Current querying page. Start from 1. Default:1.</param>
         /// <param name="size">Default:10 Max:100.</param>
-        /// <param name="archived">Default: false. Set to true for archived data from 6 months ago.</param>
+        /// <param name="isolatedSymbol">Symbol in Isolated Margin.</param>
         /// <param name="recvWindow">The value cannot be greater than 60000.</param>
         /// <returns>Margin account transfer history, response in descending order.</returns>
-        public async Task<string> GetCrossMarginTransferHistory(string asset = null, CrossMarginTransferType? type = null, long? startTime = null, long? endTime = null, int? current = null, int? size = null, bool? archived = null, long? recvWindow = null)
+        public async Task<string> GetCrossMarginTransferHistory(string asset = null, CrossMarginTransferType? type = null, long? startTime = null, long? endTime = null, int? current = null, int? size = null, string isolatedSymbol = null, long? recvWindow = null)
         {
             var result = await this.SendSignedAsync<string>(
                 GET_CROSS_MARGIN_TRANSFER_HISTORY,
@@ -350,89 +295,7 @@ namespace Binance.Spot
                     { "endTime", endTime },
                     { "current", current },
                     { "size", size },
-                    { "archived", archived },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string QUERY_LOAN_RECORD = "/sapi/v1/margin/loan";
-
-        /// <summary>
-        /// - `txId` or `startTime` must be sent. `txId` takes precedence.<para />
-        /// - Response in descending order.<para />
-        /// - If `isolatedSymbol` is not sent, crossed margin data will be returned.<para />
-        /// - Set `archived` to `true` to query data from 6 months ago.<para />
-        /// Weight(IP): 10.
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="isolatedSymbol">Isolated symbol.</param>
-        /// <param name="txId">the tranId in  `POST /sapi/v1/margin/loan`.</param>
-        /// <param name="startTime">UTC timestamp in ms.</param>
-        /// <param name="endTime">UTC timestamp in ms.</param>
-        /// <param name="current">Current querying page. Start from 1. Default:1.</param>
-        /// <param name="size">Default:10 Max:100.</param>
-        /// <param name="archived">Default: false. Set to true for archived data from 6 months ago.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Loan records.</returns>
-        public async Task<string> QueryLoanRecord(string asset, string isolatedSymbol = null, long? txId = null, long? startTime = null, long? endTime = null, long? current = null, long? size = null, bool? archived = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                QUERY_LOAN_RECORD,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
                     { "isolatedSymbol", isolatedSymbol },
-                    { "txId", txId },
-                    { "startTime", startTime },
-                    { "endTime", endTime },
-                    { "current", current },
-                    { "size", size },
-                    { "archived", archived },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string QUERY_REPAY_RECORD = "/sapi/v1/margin/repay";
-
-        /// <summary>
-        /// - `txId` or `startTime` must be sent. `txId` takes precedence.<para />
-        /// - Response in descending order.<para />
-        /// - If `isolatedSymbol` is not sent, crossed margin data will be returned.<para />
-        /// - Set `archived` to `true` to query data from 6 months ago.<para />
-        /// Weight(IP): 10.
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="isolatedSymbol">Isolated symbol.</param>
-        /// <param name="txId">the tranId in  `POST /sapi/v1/margin/repay`.</param>
-        /// <param name="startTime">UTC timestamp in ms.</param>
-        /// <param name="endTime">UTC timestamp in ms.</param>
-        /// <param name="current">Current querying page. Start from 1. Default:1.</param>
-        /// <param name="size">Default:10 Max:100.</param>
-        /// <param name="archived">Default: false. Set to true for archived data from 6 months ago.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Load records.</returns>
-        public async Task<string> QueryRepayRecord(string asset, string isolatedSymbol = null, long? txId = null, long? startTime = null, long? endTime = null, long? current = null, long? size = null, bool? archived = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                QUERY_REPAY_RECORD,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
-                    { "isolatedSymbol", isolatedSymbol },
-                    { "txId", txId },
-                    { "startTime", startTime },
-                    { "endTime", endTime },
-                    { "current", current },
-                    { "size", size },
-                    { "archived", archived },
                     { "recvWindow", recvWindow },
                     { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
                 });
@@ -913,76 +776,6 @@ namespace Binance.Spot
             return result;
         }
 
-        private const string ISOLATED_MARGIN_ACCOUNT_TRANSFER = "/sapi/v1/margin/isolated/transfer";
-
-        /// <summary>
-        /// Weight(UID): 600.
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
-        /// <param name="transFrom"></param>
-        /// <param name="transTo"></param>
-        /// <param name="amount"></param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Transaction Id.</returns>
-        public async Task<string> IsolatedMarginAccountTransfer(string asset, string symbol, IsolatedMarginAccountTransferType transFrom, IsolatedMarginAccountTransferType transTo, decimal amount, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                ISOLATED_MARGIN_ACCOUNT_TRANSFER,
-                HttpMethod.Post,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
-                    { "symbol", symbol },
-                    { "transFrom", transFrom },
-                    { "transTo", transTo },
-                    { "amount", amount },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string GET_ISOLATED_MARGIN_TRANSFER_HISTORY = "/sapi/v1/margin/isolated/transfer";
-
-        /// <summary>
-        /// Weight(IP): 1.
-        /// </summary>
-        /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
-        /// <param name="asset"></param>
-        /// <param name="transFrom"></param>
-        /// <param name="transTo"></param>
-        /// <param name="startTime">UTC timestamp in ms.</param>
-        /// <param name="endTime">UTC timestamp in ms.</param>
-        /// <param name="current">Current querying page. Start from 1. Default:1.</param>
-        /// <param name="size">Default:10 Max:100.</param>
-        /// <param name="archived">Default: false. Set to true for archived data from 6 months ago.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Isolated Margin Transfer History.</returns>
-        public async Task<string> GetIsolatedMarginTransferHistory(string symbol, string asset = null, IsolatedMarginAccountTransferType? transFrom = null, IsolatedMarginAccountTransferType? transTo = null, long? startTime = null, long? endTime = null, long? current = null, long? size = null, string archived = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                GET_ISOLATED_MARGIN_TRANSFER_HISTORY,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "asset", asset },
-                    { "symbol", symbol },
-                    { "transFrom", transFrom },
-                    { "transTo", transTo },
-                    { "startTime", startTime },
-                    { "endTime", endTime },
-                    { "current", current },
-                    { "size", size },
-                    { "archived", archived },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
         private const string QUERY_ISOLATED_MARGIN_ACCOUNT_INFO = "/sapi/v1/margin/isolated/account";
 
         /// <summary>
@@ -1078,43 +871,22 @@ namespace Binance.Spot
             return result;
         }
 
-        private const string QUERY_ISOLATED_MARGIN_SYMBOL = "/sapi/v1/margin/isolated/pair";
+        private const string GET_ALL_ISOLATED_MARGIN_SYMBOL = "/sapi/v1/margin/isolated/allPairs";
 
         /// <summary>
         /// Weight(IP): 10.
         /// </summary>
         /// <param name="symbol">Trading symbol, e.g. BNBUSDT.</param>
         /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Isolated Margin Symbol.</returns>
-        public async Task<string> QueryIsolatedMarginSymbol(string symbol, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                QUERY_ISOLATED_MARGIN_SYMBOL,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "symbol", symbol },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string GET_ALL_ISOLATED_MARGIN_SYMBOL = "/sapi/v1/margin/isolated/allPairs";
-
-        /// <summary>
-        /// Weight(IP): 10.
-        /// </summary>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
         /// <returns>All Isolated Margin Symbols.</returns>
-        public async Task<string> GetAllIsolatedMarginSymbol(long? recvWindow = null)
+        public async Task<string> GetAllIsolatedMarginSymbol(string symbol = null, long? recvWindow = null)
         {
             var result = await this.SendSignedAsync<string>(
                 GET_ALL_ISOLATED_MARGIN_SYMBOL,
                 HttpMethod.Get,
                 query: new Dictionary<string, object>
                 {
+                    { "symbol", symbol },
                     { "recvWindow", recvWindow },
                     { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
                 });
@@ -1297,32 +1069,6 @@ namespace Binance.Spot
                 {
                     { "isIsolated", isIsolated },
                     { "symbol", symbol },
-                    { "recvWindow", recvWindow },
-                    { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
-                });
-
-            return result;
-        }
-
-        private const string MARGIN_DUSTLOG = "/sapi/v1/margin/dribblet";
-
-        /// <summary>
-        /// Query the historical information of user's margin account small-value asset conversion BNB.<para />
-        /// Weight(IP): 1.
-        /// </summary>
-        /// <param name="startTime">UTC timestamp in ms.</param>
-        /// <param name="endTime">UTC timestamp in ms.</param>
-        /// <param name="recvWindow">The value cannot be greater than 60000.</param>
-        /// <returns>Usage..</returns>
-        public async Task<string> MarginDustlog(long? startTime = null, long? endTime = null, long? recvWindow = null)
-        {
-            var result = await this.SendSignedAsync<string>(
-                MARGIN_DUSTLOG,
-                HttpMethod.Get,
-                query: new Dictionary<string, object>
-                {
-                    { "startTime", startTime },
-                    { "endTime", endTime },
                     { "recvWindow", recvWindow },
                     { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
                 });

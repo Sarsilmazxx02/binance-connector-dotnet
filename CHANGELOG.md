@@ -1,5 +1,62 @@
 # Changelog
 
+## 4.1.0 - 2024-06-17
+### Added
+- New endpoints for Margin:
+  - `POST /sapi/v1/margin/borrow-repay`: Margin account borrow/repay
+  - `GET /sapi/v1/margin/borrow-repay`: Query borrow/repay records in Margin account
+
+### Updated
+- Updated dependencies versions:
+  - `Microsoft.Extensions.Logging` to `8.0.0`
+  - `Microsoft.Extensions.Logging.Console` to `8.0.0`
+  - `Microsoft.Extensions.Logging.Abstractions` to `8.0.1`
+  - `BouncyCastle.Cryptograph` to `2.3.1`
+- Margin:
+  - `GET /sapi/v1/margin/transfer`: add parameter `isolatedSymbol`
+  - `GET /sapi/v1/margin/allAssets`: add parameter `asset`
+  - `GET /sapi/v1/margin/allPairs`: add parameter `symbol`
+  - `GET /sapi/v1/margin/isolated/allPairs`: add parameter `symbol`
+
+### Removed
+- Bswap
+  - `GET /sapi/v1/bswap/pools`
+  - `GET /sapi/v1/bswap/liquidity`
+  - `POST /sapi/v1/bswap/liquidityAdd`
+  - `POST /sapi/v1/bswap/liquidityRemove`
+  - `GET /sapi/v1/bswap/liquidityOps`
+  - `GET /sapi/v1/bswap/quote`
+  - `POST /sapi/v1/bswap/swap`
+  - `GET /sapi/v1/bswap/swap`
+  - `GET /sapi/v1/bswap/poolConfigure`
+  - `GET /sapi/v1/bswap/addLiquidityPreview`
+  - `GET /sapi/v1/bswap/removeLiquidityPreview`
+  - `GET /sapi/v1/bswap/unclaimedRewards`
+  - `POST /sapi/v1/bswap/claimRewards`
+  - `GET /sapi/v1/bswap/claimedHistory`
+
+- Margin
+  - `GET /sapi/v1/margin/isolated/pair`
+  - `POST /sapi/v1/margin/isolated/transfer`
+  - `GET /sapi/v1/margin/isolated/transfer`
+  - `GET /sapi/v1/margin/asset`
+  - `POST /sapi/v1/margin/loan`
+  - `GET /sapi/v1/margin/dribblet`
+  - `GET /sapi/v1/margin/loan`
+  - `GET /sapi/v1/margin/pair`
+  - `POST /sapi/v1/margin/repay`
+  - `GET /sapi/v1/margin/repay`
+  - `POST /sapi/v1/margin/transfer`
+
+- Staking
+  - `GET /sapi/v1/staking/productList`
+  - `POST /sapi/v1/staking/purchase`
+  - `POST /sapi/v1/staking/redeem`
+  - `GET /sapi/v1/staking/position`
+  - `GET /sapi/v1/staking/stakingRecord`
+  - `POST /sapi/v1/staking/setAutoStaking`
+  - `GET /sapi/v1/staking/personalLeftQuota`
+
 ## 4.0.1 - 2023-10-04
 
 ### Updated

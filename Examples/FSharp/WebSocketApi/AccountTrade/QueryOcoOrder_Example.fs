@@ -16,7 +16,7 @@ let main argv =
         builder.AddConsole() |> ignore
     )
     let logger = loggerFactory.CreateLogger()
-    let websocket = new WebSocketApi("wss://testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac("apiSecret"));
+    let websocket = new WebSocketApi("wss://ws-api.testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac("apiSecret"));
 
     let onlyOneMessage = new TaskCompletionSource<string>();
 

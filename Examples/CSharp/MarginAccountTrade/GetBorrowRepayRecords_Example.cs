@@ -9,7 +9,7 @@ namespace Binance.Spot.MarginAccountTradeExamples
     using Binance.Spot.Models;
     using Microsoft.Extensions.Logging;
 
-    public class MarginAccountRepay_Example
+    public class GetBorrowRepayRecords_Example
     {
         public static async Task Main(string[] args)
         {
@@ -17,7 +17,7 @@ namespace Binance.Spot.MarginAccountTradeExamples
             {
                 builder.AddConsole();
             });
-            ILogger logger = loggerFactory.CreateLogger<MarginAccountRepay_Example>();
+            ILogger logger = loggerFactory.CreateLogger<GetBorrowRepayRecords_Example>();
 
             HttpMessageHandler loggingHandler = new BinanceLoggingHandler(logger: logger);
             HttpClient httpClient = new HttpClient(handler: loggingHandler);
@@ -27,7 +27,7 @@ namespace Binance.Spot.MarginAccountTradeExamples
 
             var marginAccountTrade = new MarginAccountTrade(httpClient, apiKey: apiKey, apiSecret: apiSecret);
 
-            var result = await marginAccountTrade.MarginAccountRepay("BTC", 1.01m);
+            var result = await marginAccountTrade.GetBorrowRepayRecords(MarginBorrowRepayType.BORROW);
         }
     }
 }

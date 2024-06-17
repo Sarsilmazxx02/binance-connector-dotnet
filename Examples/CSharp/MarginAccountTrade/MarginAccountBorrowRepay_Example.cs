@@ -1,4 +1,4 @@
-namespace Binance.Spot.BSwapExamples
+namespace Binance.Spot.MarginAccountTradeExamples
 {
     using System;
     using System.Net;
@@ -9,7 +9,7 @@ namespace Binance.Spot.BSwapExamples
     using Binance.Spot.Models;
     using Microsoft.Extensions.Logging;
 
-    public class Swap_Example
+    public class MarginAccountBorrowRepay_Example
     {
         public static async Task Main(string[] args)
         {
@@ -17,7 +17,7 @@ namespace Binance.Spot.BSwapExamples
             {
                 builder.AddConsole();
             });
-            ILogger logger = loggerFactory.CreateLogger<Swap_Example>();
+            ILogger logger = loggerFactory.CreateLogger<MarginAccountBorrowRepay_Example>();
 
             HttpMessageHandler loggingHandler = new BinanceLoggingHandler(logger: logger);
             HttpClient httpClient = new HttpClient(handler: loggingHandler);
@@ -25,9 +25,9 @@ namespace Binance.Spot.BSwapExamples
             string apiKey = "api-key";
             string apiSecret = "api-secret";
 
-            var bSwap = new BSwap(httpClient, apiKey: apiKey, apiSecret: apiSecret);
+            var marginAccountTrade = new MarginAccountTrade(httpClient, apiKey: apiKey, apiSecret: apiSecret);
 
-            var result = await bSwap.Swap("USDT", "BUSD", 12415.2m);
+            var result = await marginAccountTrade.MarginAccountBorrowRepay("BNB", "TRUE", "BNBUSDT", "1.0", MarginBorrowRepayType.BORROW);
         }
     }
 }
