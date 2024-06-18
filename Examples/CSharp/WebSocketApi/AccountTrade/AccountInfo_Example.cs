@@ -18,7 +18,7 @@ namespace Binance.Spot.WebSocketApiExamples
             ILogger logger = loggerFactory.CreateLogger<AccountInfo_Example>();
 
             string privateKey = File.ReadAllText("/Users/john/ssl/Private_key.pem");
-            var websocket = new WebSocketApi(baseUrl: "wss://testnet.binance.vision/ws-api/v3", apiKey: "apiKey", signatureService: new BinanceRsa(privateKey));
+            var websocket = new WebSocketApi(baseUrl: "wss://ws-api.testnet.binance.vision/ws-api/v3", apiKey: "apiKey", signatureService: new BinanceRsa(privateKey));
 
             websocket.OnMessageReceived(
                 async (data) =>

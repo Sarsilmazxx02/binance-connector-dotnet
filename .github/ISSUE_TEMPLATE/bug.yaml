@@ -40,8 +40,9 @@ body:
       description: "What version of .NET are you running?"
       options:
         - .NET Core 3.1.x
-        - .NET Framework 5.0.x
         - .NET Framework 6.0.x
+        - .NET Framework 7.0.x
+        - .NET Framework 8.0.x
         - Other (specify in environment)
     validations:
       required: true

@@ -12,14 +12,14 @@ namespace Binance.Spot.Tests
         private string apiKey = "api-key";
         private string apiSecret = "api-secret";
 
-        #region CrossMarginAccountTransfer
+        #region MarginAccountBorrowRepay
         [Fact]
-        public async void CrossMarginAccountTransfer_Response()
+        public async void MarginAccountBorrowRepay_Response()
         {
-            var responseContent = "{\"tranId\":345196462}";
+            var responseContent = "{\"tranId\": 100000001}";
             var mockMessageHandler = new Mock<HttpMessageHandler>();
             mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/transfer", HttpMethod.Post)
+                .SetupSendAsync("/sapi/v1/margin/borrow-repay", HttpMethod.Post)
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
@@ -30,20 +30,20 @@ namespace Binance.Spot.Tests
                 apiKey: this.apiKey,
                 apiSecret: this.apiSecret);
 
-            var result = await marginAccountTrade.CrossMarginAccountTransfer("BTC", 1.01m, MarginTransferType.SPOT_TO_MARGIN);
+            var result = await marginAccountTrade.MarginAccountBorrowRepay("BNB", "TRUE", "BNBUSDT", "1.0", MarginBorrowRepayType.BORROW);
 
             Assert.Equal(responseContent, result);
         }
         #endregion
 
-        #region MarginAccountBorrow
+        #region GetBorrowRepayRecords
         [Fact]
-        public async void MarginAccountBorrow_Response()
+        public async void GetBorrowRepayRecords_Response()
         {
-            var responseContent = "{\"tranId\":345196462}";
+            var responseContent = "{\"rows\":[{\"isolatedSymbol\":\"BNBUSDT\",\"amount\":\"14.00000000\",\"asset\":\"BNB\",\"interest\":\"0.01866667\",\"principal\":\"13.98133333\",\"status\":\"CONFIRMED\",\"timestamp\":1563438204000,\"txId\":2970933056}],\"total\":1}";
             var mockMessageHandler = new Mock<HttpMessageHandler>();
             mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/loan", HttpMethod.Post)
+                .SetupSendAsync("/sapi/v1/margin/borrow-repay", HttpMethod.Get)
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
@@ -54,79 +54,7 @@ namespace Binance.Spot.Tests
                 apiKey: this.apiKey,
                 apiSecret: this.apiSecret);
 
-            var result = await marginAccountTrade.MarginAccountBorrow("BTC", 1.01m);
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region MarginAccountRepay
-        [Fact]
-        public async void MarginAccountRepay_Response()
-        {
-            var responseContent = "{\"tranId\":345196462}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/repay", HttpMethod.Post)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.MarginAccountRepay("BTC", 1.01m);
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region QueryMarginAsset
-        [Fact]
-        public async void QueryMarginAsset_Response()
-        {
-            var responseContent = "{\"assetFullName\":\"Binance Coin\",\"assetName\":\"BNB\",\"isBorrowable\":false,\"isMortgageable\":true,\"userMinBorrow\":\"0.00000000\",\"userMinRepay\":\"0.00000000\"}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/asset", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.QueryMarginAsset("BTC");
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region QueryCrossMarginPair
-        [Fact]
-        public async void QueryCrossMarginPair_Response()
-        {
-            var responseContent = "{\"id\":323355778339572400,\"symbol\":\"BNBUSDT\",\"base\":\"BTC\",\"quote\":\"USDT\",\"isMarginTrade\":true,\"isBuyAllowed\":true,\"isSellAllowed\":true}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/pair", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.QueryCrossMarginPair("BNBUSDT");
+            var result = await marginAccountTrade.GetBorrowRepayRecords(MarginBorrowRepayType.BORROW);
 
             Assert.Equal(responseContent, result);
         }
@@ -295,54 +223,6 @@ namespace Binance.Spot.Tests
                 apiSecret: this.apiSecret);
 
             var result = await marginAccountTrade.GetCrossMarginTransferHistory();
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region QueryLoanRecord
-        [Fact]
-        public async void QueryLoanRecord_Response()
-        {
-            var responseContent = "{\"rows\":[{\"isolatedSymbol\":\"\",\"txId\":0,\"asset\":\"\",\"principal\":\"\",\"timestamp\":0,\"status\":\"\"}],\"total\":0}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/loan", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.QueryLoanRecord("BTC");
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region QueryRepayRecord
-        [Fact]
-        public async void QueryRepayRecord_Response()
-        {
-            var responseContent = "{\"rows\":[{\"isolatedSymbol\":\"BNBUSDT\",\"amount\":\"14.00000000\",\"asset\":\"BNB\",\"interest\":\"0.01866667\",\"principal\":\"13.98133333\",\"status\":\"CONFIRMED\",\"timestamp\":1563438204000,\"txId\":2970933056}],\"total\":1}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/repay", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.QueryRepayRecord("BTC");
 
             Assert.Equal(responseContent, result);
         }
@@ -684,54 +564,6 @@ namespace Binance.Spot.Tests
         }
         #endregion
 
-        #region IsolatedMarginAccountTransfer
-        [Fact]
-        public async void IsolatedMarginAccountTransfer_Response()
-        {
-            var responseContent = "{}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/isolated/transfer", HttpMethod.Post)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.IsolatedMarginAccountTransfer("BTC", "BNBUSDT", IsolatedMarginAccountTransferType.SPOT, IsolatedMarginAccountTransferType.ISOLATED_MARGIN, 1.01m);
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region GetIsolatedMarginTransferHistory
-        [Fact]
-        public async void GetIsolatedMarginTransferHistory_Response()
-        {
-            var responseContent = "{\"rows\":[{\"amount\":\"0.10000000\",\"asset\":\"BNB\",\"status\":\"CONFIRMED\",\"timestamp\":1566898617000,\"txId\":5240372201,\"transFrom\":\"SPOT\",\"transTo\":\"ISOLATED_MARGIN\"}],\"total\":1}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/isolated/transfer", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.GetIsolatedMarginTransferHistory("BNBUSDT");
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
         #region QueryIsolatedMarginAccountInfo
         [Fact]
         public async void QueryIsolatedMarginAccountInfo_Response()
@@ -823,30 +655,6 @@ namespace Binance.Spot.Tests
                 apiSecret: this.apiSecret);
 
             var result = await marginAccountTrade.QueryEnabledIsolatedMarginAccountLimit();
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region QueryIsolatedMarginSymbol
-        [Fact]
-        public async void QueryIsolatedMarginSymbol_Response()
-        {
-            var responseContent = "{\"symbol\":\"BTCUSDT\",\"base\":\"BTC\",\"quote\":\"USDT\",\"isMarginTrade\":true,\"isBuyAllowed\":true,\"isSellAllowed\":true}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/isolated/pair", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.QueryIsolatedMarginSymbol("BNBUSDT");
 
             Assert.Equal(responseContent, result);
         }
@@ -1039,30 +847,6 @@ namespace Binance.Spot.Tests
                 apiSecret: this.apiSecret);
 
             var result = await marginAccountTrade.QueryCurrentMarginOrderCountUsage();
-
-            Assert.Equal(responseContent, result);
-        }
-        #endregion
-
-        #region MarginDustlog
-        [Fact]
-        public async void MarginDustlog_Response()
-        {
-            var responseContent = "{\"total\":8,\"userAssetDribblets\":[{\"operateTime\":1615985535000,\"totalTransferedAmount\":\"0.00132256\",\"totalServiceChargeAmount\":\"0.00002699\",\"transId\":45178372831,\"userAssetDribbletDetails\":[{\"transId\":4359321,\"serviceChargeAmount\":\"0.000009\",\"amount\":\"0.0009\",\"operateTime\":1615985535000,\"transferedAmount\":\"0.000441\",\"fromAsset\":\"USDT\"},{\"transId\":4359321,\"serviceChargeAmount\":\"0.00001799\",\"amount\":\"0.0009\",\"operateTime\":1615985535000,\"transferedAmount\":\"0.00088156\",\"fromAsset\":\"ETH\"}]}]}";
-            var mockMessageHandler = new Mock<HttpMessageHandler>();
-            mockMessageHandler.Protected()
-                .SetupSendAsync("/sapi/v1/margin/dribblet", HttpMethod.Get)
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(responseContent),
-                });
-            MarginAccountTrade marginAccountTrade = new MarginAccountTrade(
-                new HttpClient(mockMessageHandler.Object),
-                apiKey: this.apiKey,
-                apiSecret: this.apiSecret);
-
-            var result = await marginAccountTrade.MarginDustlog();
 
             Assert.Equal(responseContent, result);
         }

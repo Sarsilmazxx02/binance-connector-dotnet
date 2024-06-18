@@ -33,7 +33,7 @@ namespace Binance.Spot.UserDataWebSocketExamples
             string listenKey = JsonConvert.DeserializeObject<dynamic>(response).listenKey.ToString();
 
             // Subscribe to user data stream
-            var websocket = new UserDataWebSocket(listenKey, "wss://testnet.binance.vision");
+            var websocket = new UserDataWebSocket(listenKey, "wss://stream.testnet.binance.vision");
 
             var onlyOneMessage = new TaskCompletionSource<string>();
             websocket.OnMessageReceived(

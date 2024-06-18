@@ -17,7 +17,7 @@ namespace Binance.Spot.WebSocketApiExamples
             ILogger logger = loggerFactory.CreateLogger<NewOrder_Example>();
 
             string apiSecret = "apiSecret";
-            var websocket = new WebSocketApi("wss://testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac(apiSecret));
+            var websocket = new WebSocketApi("wss://ws-api.testnet.binance.vision/ws-api/v3", "apiKey", new BinanceHmac(apiSecret));
 
             websocket.OnMessageReceived(
                 async (data) =>

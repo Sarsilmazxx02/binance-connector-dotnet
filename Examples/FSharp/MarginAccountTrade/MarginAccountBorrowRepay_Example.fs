@@ -20,8 +20,8 @@ let main argv =
     let apiKey = "api-key";
     let apiSecret = "api-secret";
     
-    let bSwap = new BSwap(httpClient, apiKey = apiKey, apiSecret = apiSecret)
+    let marginAccountTrade = new MarginAccountTrade(httpClient, apiKey = apiKey, apiSecret = apiSecret)
     
-    let result = bSwap.AddLiquidity(2, "BTC", 12415.2m) |> Async.AwaitTask |> Async.RunSynchronously
+    let result = marginAccountTrade.MarginAccountBorrowRepay("BNB", "TRUE", "BNBUSDT", "1.0", MarginBorrowRepayType.BORROW) |> Async.AwaitTask |> Async.RunSynchronously
     
     0
