@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.1.0 - 2024-06-17
+## 4.1.0 - 2024-06-18
 ### Added
 - New endpoints for Margin:
   - `POST /sapi/v1/margin/borrow-repay`: Margin account borrow/repay
